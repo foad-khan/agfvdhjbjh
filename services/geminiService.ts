@@ -1,11 +1,16 @@
+// Remove or comment out: import { config } from 'dotenv'; config();
+
+// Use import.meta.env to access environment variables (Vite's way)
+const apiKey = import.meta.env.GOOGLE_GENAI_API_KEY;
+
+if (!apiKey) {
+    throw new Error("GOOGLE_GENAI_API_KEY environment variable is not set");
+}
+
 import { GoogleGenAI, Type } from "@google/genai";
 import type { PatientHistory, Duration, FamilyHistory, PastHistoryData, ChiefComplaint, DifferentialDiagnosis, HOPData } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable is not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey });
 
 export const generateHOPQuestions = async (chiefComplaint: string): Promise<string[]> => {
     if (!chiefComplaint.trim()) {
@@ -19,18 +24,18 @@ export const generateHOPQuestions = async (chiefComplaint: string): Promise<stri
             model: "gemini-2.5-flash",
             contents: prompt,
             config: {
-              responseMimeType: "application/json",
-              responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                  questions: {
-                    type: Type.ARRAY,
-                    items: {
-                      type: Type.STRING,
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        questions: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.STRING,
+                            },
+                        },
                     },
-                  },
                 },
-              },
             },
         });
 
@@ -118,7 +123,6 @@ const formatHopForSummary = (hop: HOPData): string => {
     return details ? `\n  - History of Presenting Complaint:\n${details}` : '';
 };
 
-
 export const generateHistorySummary = async (history: PatientHistory): Promise<string> => {
     try {
         const complaintsList = history.chiefComplaints
@@ -131,36 +135,36 @@ export const generateHistorySummary = async (history: PatientHistory): Promise<s
             .join('\n');
 
         const prompt = `
-        You are an AI assistant tasked with creating a comprehensive medical history summary. Based on the following patient data, generate a well-structured, and professionally formatted medical history summary. The summary should be written in clear medical English, suitable for a case presentation.
+            You are an AI assistant tasked with creating a comprehensive medical history summary. Based on the following patient data, generate a well-structured, and professionally formatted medical history summary. The summary should be written in clear medical English, suitable for a case presentation.
 
-        Patient Data:
-        - Demographics: 
-          - Name: ${history.demographics.name}
-          - Age/Sex: ${history.demographics.age} / ${history.demographics.sex}
-          - Marital Status: ${history.demographics.maritalStatus || 'Not specified.'}
-          - Occupation: ${history.demographics.occupation}
-          - Religion: ${history.demographics.religion || 'Not specified.'}
-          - Education: ${history.demographics.education || 'Not specified.'}
-          - Total Family Monthly Income: ${history.demographics.familyIncome ? `₹${history.demographics.familyIncome}` : 'Not specified.'}
-          - Socio-economic Status: ${history.demographics.socioEconomicStatus || 'Not specified.'} (Calculated)
-          - Address: ${history.demographics.address}
-          - Attendant's Name: ${history.demographics.attendantName || 'Not specified.'}
-          - Blood Group: ${history.demographics.bloodGroup || 'Not specified.'}
-          - Phone Number: ${history.demographics.phoneNumber || 'Not specified.'}
-        - Chief Complaints & History of Presenting Complaint:
-          ${complaintsList || 'No chief complaints reported.'}
-        - Past Medical & Surgical History: ${formatPastHistoryForSummary(history.pastHistory)}
-        - Personal History: 
-          - Diet: ${history.personalHistory.diet}
-          - Sleep: ${history.personalHistory.sleep || 'Not specified.'}
-          - Appetite: ${history.personalHistory.appetite || 'Not specified.'}
-          - Bladder: ${history.personalHistory.bladder || 'Not specified.'}
-          - Bowel: ${history.personalHistory.bowel || 'Not specified.'}
-          - Habits: ${history.personalHistory.habits.join(', ') || 'No significant habits reported.'}
-          - Other: ${history.personalHistory.other || 'None.'}
-        - Family History: ${formatFamilyHistoryForSummary(history.familyHistory)}
+            Patient Data:
+                - Demographics: 
+                    - Name: ${history.demographics.name}
+                    - Age/Sex: ${history.demographics.age} / ${history.demographics.sex}
+                    - Marital Status: ${history.demographics.maritalStatus || 'Not specified.'}
+                    - Occupation: ${history.demographics.occupation}
+                    - Religion: ${history.demographics.religion || 'Not specified.'}
+                    - Education: ${history.demographics.education || 'Not specified.'}
+                    - Total Family Monthly Income: ${history.demographics.familyIncome ? `₹${history.demographics.familyIncome}` : 'Not specified.'}
+                    - Socio-economic Status: ${history.demographics.socioEconomicStatus || 'Not specified.'} (Calculated)
+                    - Address: ${history.demographics.address}
+                    - Attendant's Name: ${history.demographics.attendantName || 'Not specified.'}
+                    - Blood Group: ${history.demographics.bloodGroup || 'Not specified.'}
+                    - Phone Number: ${history.demographics.phoneNumber || 'Not specified.'}
+                - Chief Complaints & History of Presenting Complaint:
+                    ${complaintsList || 'No chief complaints reported.'}
+                - Past Medical & Surgical History: ${formatPastHistoryForSummary(history.pastHistory)}
+                - Personal History: 
+                    - Diet: ${history.personalHistory.diet}
+                    - Sleep: ${history.personalHistory.sleep || 'Not specified.'}
+                    - Appetite: ${history.personalHistory.appetite || 'Not specified.'}
+                    - Bladder: ${history.personalHistory.bladder || 'Not specified.'}
+                    - Bowel: ${history.personalHistory.bowel || 'Not specified.'}
+                    - Habits: ${history.personalHistory.habits.join(', ') || 'No significant habits reported.'}
+                    - Other: ${history.personalHistory.other || 'None.'}
+                - Family History: ${formatFamilyHistoryForSummary(history.familyHistory)}
 
-        Structure the output with clear headings for each section (e.g., Patient Profile, Chief Complaints & History of Presenting Complaint, etc.). Ensure the language is formal and clinical.
+            Structure the output with clear headings for each section (e.g., Patient Profile, Chief Complaints & History of Presenting Complaint, etc.). Ensure the language is formal and clinical.
         `;
 
         const response = await ai.models.generateContent({
@@ -183,7 +187,7 @@ export const generateDifferentialDiagnosis = async (complaints: ChiefComplaint[]
             return `${c.complaint.trim()}${durationStr ? ` (for ${durationStr})` : ''}`;
         })
         .join(', ');
-        
+    
     if (!complaintString) {
         return [];
     }

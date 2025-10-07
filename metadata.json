@@ -1,0 +1,7 @@
+{
+  "name": "Copy of AI Patient History 1.1",
+  "description": "An AI-powered web application for structured patient history taking. It provides guided steps and leverages AI to generate relevant questions and final summaries.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

@@ -18,6 +18,6 @@ export default defineConfig(({ mode }) => {
           '@': path.resolve(__dirname, '.'),
         }
       },
-      base: '/agfvdhjbjh/', // Add this to match the GitHub Pages subpath
+      base: '/agfvdhjbjh', // Add this to match the GitHub Pages subpath
     };
 });

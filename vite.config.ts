@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+      base: '/agfvdhjbjh/', // Add this to match the GitHub Pages subpath
     };
 });
